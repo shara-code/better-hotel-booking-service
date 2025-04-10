@@ -1,7 +1,8 @@
 import asyncio
 import json
 from datetime import datetime
-
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache import FastAPICache
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import insert
@@ -55,6 +56,11 @@ def event_loop(request):
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
+
+
+@pytest.fixture(autouse=True)
+async def initialize_cache():
+    FastAPICache.init(InMemoryBackend())
 
 
 @pytest.fixture(scope="function")
