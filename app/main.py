@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
@@ -17,6 +18,13 @@ from app.hotels.router import router as router_hotels
 from app.images.router import router as router_images
 from app.pages.router import router as router_pages
 from app.users.router import router_auth, router_users
+
+sentry_sdk.init(
+    dsn="https://c051b57e2c13f7898e45000dffeb8137@o4509151296880640.ingest.de.sentry.io/4509151891750992",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
 
 app = FastAPI()
 
@@ -56,3 +64,8 @@ admin.add_view(BookingsAdmin)
 
 
 app.mount("/static", StaticFiles(directory="app/static"), "static")
+
+# # Sentury trigger
+# @app.get("/sentry-debug")
+# async def trigger_error():
+#     division_by_zero = 1 / 0
