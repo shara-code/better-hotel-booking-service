@@ -1,10 +1,11 @@
 from typing import Literal
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     MODE: Literal["DEV", "TEST", "PROD"]
+    DSN: str
 
     DB_HOST: str
     DB_PORT: int

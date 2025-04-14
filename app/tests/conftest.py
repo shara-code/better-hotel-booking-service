@@ -5,7 +5,7 @@ from datetime import datetime
 import pytest
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy import insert
 
 from app.bookings.models import Bookings
@@ -66,13 +66,15 @@ async def initialize_cache():
 
 @pytest.fixture(scope="function")
 async def ac():
-    async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:
+    transport = ASGITransport(app=fastapi_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
 
 @pytest.fixture(scope="session")
 async def authenticated_ac():
-    async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:
+    transport = ASGITransport(app=fastapi_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         await ac.post(
             "/auth/login",
             json={
