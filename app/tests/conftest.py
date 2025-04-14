@@ -1,9 +1,10 @@
 import asyncio
 import json
 from datetime import datetime
-from fastapi_cache.backends.inmemory import InMemoryBackend
-from fastapi_cache import FastAPICache
+
 import pytest
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from httpx import AsyncClient
 from sqlalchemy import insert
 

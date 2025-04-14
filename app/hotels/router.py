@@ -1,13 +1,15 @@
 import asyncio
 from datetime import date
-from fastapi import APIRouter
-from typing import Optional, List
+from typing import List, Optional
 
+from fastapi import APIRouter
+from fastapi_cache.decorator import cache
 from pydantic import parse_obj_as
-from app.exceptions import CannotBookHotelForLongPeriod, DateFromCannotBeAfterDateTo
+
+from app.exceptions import (CannotBookHotelForLongPeriod,
+                            DateFromCannotBeAfterDateTo)
 from app.hotels.dao import HotelDAO
 from app.hotels.schemas import SHotel, SHotelInfo
-from fastapi_cache.decorator import cache
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 

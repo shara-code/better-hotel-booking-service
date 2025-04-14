@@ -1,29 +1,22 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
-from app.database import engine
-
-from collections.abc import AsyncIterator
-
-from app.config import settings
-from app.users.router import router_auth, router_users
-from app.bookings.router import router as router_bookings
-from app.hotels.router import router as router_hotels
-
-
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-
 from redis import asyncio as aioredis
-
-from app.pages.router import router as router_pages
-from app.images.router import router as router_images
-
 from sqladmin import Admin
 
 from app.admin.auth import authentication_backend
+from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
+from app.bookings.router import router as router_bookings
+from app.config import settings
+from app.database import engine
+from app.hotels.router import router as router_hotels
+from app.images.router import router as router_images
+from app.pages.router import router as router_pages
+from app.users.router import router_auth, router_users
 
 app = FastAPI()
 

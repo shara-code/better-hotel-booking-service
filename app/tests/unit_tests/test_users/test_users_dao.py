@@ -3,11 +3,10 @@ import pytest
 from app.users.dao import UsersDAO
 
 
-@pytest.mark.parametrize("email,exists", [
-    ("test@test.com", True),
-    ("artem@example.com", True),
-    (".....", False)
-])
+@pytest.mark.parametrize(
+    "email,exists",
+    [("test@test.com", True), ("artem@example.com", True), (".....", False)],
+)
 async def test_find_user_by_id(email, exists):
     user = await UsersDAO.find_one_or_none(email=email)
 
