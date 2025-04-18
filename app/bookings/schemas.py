@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -14,18 +13,16 @@ class SBooking(BaseModel):
     total_cost: int
     total_days: int
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class SBookingInfo(SBooking):
     image_id: int
     name: str
-    description: Optional[str]
+    description: str | None
     services: list[str]
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class SNewBooking(BaseModel):
