@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter
 from fastapi_cache.decorator import cache
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 
 from app.exceptions import (CannotBookHotelForLongPeriod,
                             DateFromCannotBeAfterDateTo)
@@ -27,7 +27,7 @@ async def get_hotels_by_location_and_time(
     if (date_to - date_from).days > 31:
         raise CannotBookHotelForLongPeriod
     hotels = await HotelDAO.find_all(location, date_from, date_to)
-    hotels_json = parse_obj_as(List[SHotelInfo], hotels)
+    hotels_json = TypeAdapter(List[SHotelInfo]).validate_python(hotels)
     return hotels_json
 
 

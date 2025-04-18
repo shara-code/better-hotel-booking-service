@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class SHotel(BaseModel):
@@ -9,10 +9,10 @@ class SHotel(BaseModel):
     rooms_quantity: int
     image_id: int
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SHotelInfo(SHotel):
     rooms_left: int
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
