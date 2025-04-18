@@ -6,6 +6,8 @@ COPY pyproject.toml uv.lock /booking/
 
 RUN uv sync --frozen --no-install-project --no-dev
 
-COPY . .
+ADD . /booking/
 
-CMD ["gunicorn", "app.main:app", "--workers", "3", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]
+ENV PATH="/booking/.venv/bin:$PATH"
+
+CMD ["gunicorn", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "app.main:app"]
