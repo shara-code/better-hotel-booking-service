@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+import logging
 
 import sentry_sdk
 from fastapi import FastAPI, Request
@@ -19,6 +20,12 @@ from app.hotels.router import router as router_hotels
 from app.images.router import router as router_images
 from app.pages.router import router as router_pages
 from app.users.router import router_auth, router_users
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 sentry_sdk.init(
     dsn=settings.DSN,
@@ -45,9 +52,9 @@ app = FastAPI(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    print(f"Request: {request.method} {request.url}")
+    logger.info(f"Request: {request.method} {request.url}")
     response = await call_next(request)
-    print(f"Response: {response.status_code}")
+    logger.info(f"Response: {response.status_code}")
     return response
 
 instrumentator = Instrumentator(
