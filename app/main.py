@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from prometheus_fastapi_instrumentator import Instrumentator
 from redis import asyncio as aioredis
 from sqladmin import Admin
 
@@ -22,36 +23,40 @@ from app.users.router import router_auth, router_users
 sentry_sdk.init(
     dsn=settings.DSN,
     send_default_pii=True,
+    traces_sample_rate=1.0,
 )
 
-app = FastAPI()
-
-
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     redis = aioredis.from_url(
         f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
         encoding="utf8",
         decode_responses=True,
     )
     FastAPICache.init(RedisBackend(redis), prefix="cache")
+    yield
 
+app = FastAPI(
+    title="Сервис бронирования отелей",
+    description="API для бронирования номеров в отелях",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+
+
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=[".*admin.*", "/metrics"]
+)
+instrumentator.instrument(app).expose(app)
 
 app.include_router(router_auth)
 app.include_router(router_users)
 app.include_router(router_hotels)
 app.include_router(router_bookings)
-
 app.include_router(router_pages)
 app.include_router(router_images)
-
-
-@asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    redis = aioredis.from_url("redis://localhost")
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    yield
-
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)
 
@@ -60,12 +65,9 @@ admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
 admin.add_view(BookingsAdmin)
 
-
 app.mount("/static", StaticFiles(directory="app/static"), "static")
 
-# Sentury trigger
-
-
+# Sentry trigger
 @app.get("/sentry-debug")
 async def trigger_error():
-    division_by_zero = 1 / 0
+    raise Exception("Тестовая ошибка для Sentry")
