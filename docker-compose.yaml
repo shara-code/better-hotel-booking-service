@@ -1,0 +1,139 @@
+services:
+  db:
+    container_name: "db"
+    image: postgres:17-alpine
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - custom
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    container_name: "redis"
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    networks:
+      - custom
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
+
+  app:
+    container_name: "booking_app"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - custom
+    env_file:
+      - .env
+    environment:
+      - MODE=${MODE}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=${ALGORITHM}
+      - DSN=${DSN}
+
+  celery:
+    container_name: "celery_worker"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: celery -A app.tasks.celery worker --loglevel=info
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - custom
+    env_file:
+      - .env
+    environment:
+      - MODE=${MODE}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - CELERY_BROKER_URL=redis://redis:${REDIS_PORT}/0
+      - CELERY_RESULT_BACKEND=redis://redis:${REDIS_PORT}/0
+    healthcheck:
+      test: ["CMD", "celery", "-A", "app.tasks.celery", "inspect", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  flower:
+    container_name: "flower"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: celery -A app.tasks.celery flower --port=5555 --broker=redis://redis:${REDIS_PORT}/0
+    ports:
+      - "5555:5555"
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery:
+        condition: service_healthy
+    networks:
+      - custom
+    env_file:
+      - .env
+    environment:
+      - MODE=${MODE}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - CELERY_BROKER_URL=redis://redis:${REDIS_PORT}/0
+      - CELERY_RESULT_BACKEND=redis://redis:${REDIS_PORT}/0
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+
+networks:
+  custom:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

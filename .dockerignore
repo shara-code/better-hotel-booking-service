@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+.github/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+.ruff_cache/
+
+# IDE folders
+.idea/
+.vscode/
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Other
+*.log
+logs/
+tmp/
+*.swp
+*~
+.DS_Store

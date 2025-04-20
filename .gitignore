@@ -1,0 +1,47 @@
+# Cursor
+.cursor 
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+*.egg
+.ruff_cache/
+
+# Virtual environments
+.venv
+venv/
+ENV/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local DB
+*.sql
+*.sqlite
+*.sqlite3
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+.DS_Store
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
